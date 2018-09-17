@@ -1,5 +1,6 @@
 from __future__ import print_function, absolute_import
 import argparse
+import time
 import os.path as osp
 import os 
 import numpy as np
@@ -21,6 +22,7 @@ from reid.utils.serialization import load_checkpoint, save_checkpoint
 
 from sklearn.cluster import DBSCAN
 from reid.rerank import re_ranking
+
 
 def get_data(name, data_dir, height, width, batch_size,
              workers):
@@ -54,6 +56,7 @@ def get_data(name, data_dir, height, width, batch_size,
         shuffle=False, pin_memory=True)
 
     return dataset, num_classes, extfeat_loader, test_loader
+
 
 def get_source_data(name, data_dir, height, width, batch_size,
              workers):
@@ -96,11 +99,11 @@ def main(args):
         args.height, args.width = (144, 56) if args.arch == 'inception' else \
                                   (256, 128)
 
-    # get_source_data
+    # get source data
     src_dataset, src_extfeat_loader = \
         get_source_data(args.src_dataset, args.data_dir, args.height,
                         args.width, args.batch_size, args.workers)
-    # get_target_data
+    # get target data
     tgt_dataset, num_classes, tgt_extfeat_loader, test_loader = \
         get_data(args.tgt_dataset, args.data_dir, args.height,
                  args.width, args.batch_size, args.workers)
@@ -115,7 +118,6 @@ def main(args):
         raise RuntimeError('Please specify the number of classes (ids) of the network.')
 
     # Load from checkpoint
-    start_epoch = best_top1 = 0
     if args.resume:
         print('Resuming checkpoints from finetuned model on another dataset...\n')
         checkpoint = load_checkpoint(args.resume)
@@ -135,15 +137,15 @@ def main(args):
         return
 
     # Criterion
-    criterion = []
-    criterion.append(TripletLoss(margin=args.margin,num_instances=args.num_instances).cuda())
-    criterion.append(TripletLoss(margin=args.margin,num_instances=args.num_instances).cuda())
+    criterion = [
+        TripletLoss(args.margin, args.num_instances).cuda(),
+        TripletLoss(args.margin, args.num_instances).cuda(),
+    ]
 
     # Optimizer
     optimizer = torch.optim.SGD(
-        model.parameters(), lr=args.lr,
-        momentum=0.9
-    )    
+        model.parameters(), lr=args.lr, momentum=0.9, 
+    )
 
     # training stage transformer on input images
     normalizer = T.Normalize(mean=[0.485, 0.456, 0.406],
@@ -170,7 +172,7 @@ def main(args):
         print('Iteration {}: Extracting Target Dataset Features...'.format(iter_n+1))
         target_features, _ = extract_features(model, tgt_extfeat_loader, print_freq=args.print_freq)
         # synchronization feature order with dataset.train
-        target_features = torch.cat([target_features[f].unsqueeze(0) for f, _, _ in tgt_dataset.train], 0) 
+        target_features = torch.cat([target_features[f].unsqueeze(0) for f, _, _ in tgt_dataset.trainval], 0) 
         # calculate distance and rerank result
         print('Calculating feature distances...') 
         target_features = target_features.numpy()
@@ -214,17 +216,21 @@ def main(args):
         for epoch in range(args.epochs):
             trainer.train(epoch, train_loader, optimizer)
         # Evaluate
-        rank1 = evaluator.evaluate(
-            test_loader, tgt_dataset.query, tgt_dataset.gallery)
+        
+        if iter_n == 19:
+            args.rho *= 0.7
+            for g in optimizer.param_groups:
+                g['lr'] *= 0.1
+            criterion = [
+                TripletLoss(args.margin, args.num_instances, False).cuda(),
+                TripletLoss(args.margin, args.num_instances, False).cuda(),
+            ]
+            mean_ap, rank1, rank5, rank10 = evaluator.evaluate(
+                test_loader, tgt_dataset.query, tgt_dataset.gallery)
 
-        save_checkpoint({
-            'state_dict': model.module.state_dict(),
-            'epoch': iter_n + 1,
-            'num_ids': num_ids,
-        }, True, fpath=osp.join(args.logs_dir, 'checkpoint.pth.tar'))
-
-        print('\n * Finished epoch {:3d}  rank1: {:5.1%} \n'.
-              format(iter_n+1, rank1))
+    mean_ap, rank1, rank5, rank10 = evaluator.evaluate(
+        test_loader, tgt_dataset.query, tgt_dataset.gallery)
+    return (mean_ap, rank1, rank5, rank10)
 
 
 if __name__ == '__main__':
@@ -272,7 +278,7 @@ if __name__ == '__main__':
                         help="evaluation only")
     parser.add_argument('--seed', type=int, default=1)
     parser.add_argument('--print_freq', type=int, default=1)
-    parser.add_argument('--iteration', type=int, default=10)
+    parser.add_argument('--iteration', type=int, default=20)
     parser.add_argument('--epochs', type=int, default=70)
     # metric learning
     parser.add_argument('--dist_metric', type=str, default='euclidean',
@@ -282,4 +288,10 @@ if __name__ == '__main__':
                         default='')
     parser.add_argument('--logs_dir', type=str, metavar='PATH',
                         default='')
-    main(parser.parse_args())
+
+    args = parser.parse_args()
+    mean_ap, rank1, rank5, rank10 = main(args)
+    results_file = np.asarray([mean_ap, rank1, rank5, rank10])
+    file_name = time.strftime("%H%M%S", time.localtime())
+    file_name = osp.join(args.logs_dir, file_name)
+    np.save(file_name, results_file)

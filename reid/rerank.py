@@ -18,7 +18,7 @@ Modified by L.Song and C.Wang
 import numpy as np
 from scipy.spatial.distance import cdist
 
-def re_ranking(input_feature_source,input_feature,k1=20,k2=6,lambda_value=0.2):
+def re_ranking(input_feature_source, input_feature, k1=20, k2=6, lambda_value=0.1):
 
     all_num = input_feature.shape[0]    
     feat = input_feature.astype(np.float16)

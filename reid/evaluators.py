@@ -99,15 +99,15 @@ def evaluate_all(distmat, query=None, gallery=None,
 
     print('CMC Scores{:>12}{:>12}{:>12}'
           .format('allshots', 'cuhk03', 'market1501'))
+    rank_score = [mAP]
     for k in cmc_topk:
         print('  top-{:<4}{:12.1%}{:12.1%}{:12.1%}'
               .format(k, cmc_scores['allshots'][k - 1],
                       cmc_scores['cuhk03'][k - 1],
                       cmc_scores['market1501'][k - 1]))
+        rank_score.append(cmc_scores['market1501'][k - 1])
 
-    # Use the allshots cmc top-1 score for validation criterion
-    return cmc_scores['allshots'][0]
-    #return mAP
+    return rank_score
 
 
 def evaluate_same_cams_all(distmat, query=None, gallery=None,

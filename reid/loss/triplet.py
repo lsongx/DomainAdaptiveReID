@@ -9,11 +9,12 @@ from scipy.stats import norm
 import numpy as np
 
 class TripletLoss(nn.Module):
-    def __init__(self, margin=0, num_instances=0):
+    def __init__(self, margin=0, num_instances=0, use_semi=True):
         super(TripletLoss, self).__init__()
         self.margin = margin
         self.ranking_loss = nn.MarginRankingLoss(margin=self.margin)
         self.K = num_instances
+        self.use_semi = use_semi
 
     def forward(self, inputs, targets, epoch):
         n = inputs.size(0)
@@ -29,9 +30,18 @@ class TripletLoss(nn.Module):
         # For each anchor, find the hardest positive and negative
         mask = targets.expand(n, n).eq(targets.expand(n, n).t())
         dist_ap, dist_an = [], []
-        for i in range(n):
-            dist_ap.append(dist[i][mask[i]].max())
-            dist_an.append(dist[i][mask[i] == 0].min())
+        if self.use_semi:
+            for i in range(P):
+                for j in range(self.K):
+                    neg_examples = dist[i*self.K+j][mask[i*self.K+j] == 0]
+                    for pair in range(j+1, self.K):
+                        ap = dist[i*self.K+j][i*self.K+pair]
+                        dist_ap.append(ap)
+                        dist_an.append(neg_examples.min())
+        else:
+            for i in range(n):
+                dist_ap.append(dist[i][mask[i]].max())
+                dist_an.append(dist[i][mask[i] == 0].min())
         dist_ap = torch.cat(dist_ap)
         dist_an = torch.cat(dist_an)
         # Compute ranking hinge loss
