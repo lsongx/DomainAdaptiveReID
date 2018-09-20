@@ -215,19 +215,8 @@ def main(args):
         # Start training
         for epoch in range(args.epochs):
             trainer.train(epoch, train_loader, optimizer)
-        # Evaluate
-        
-        if iter_n == 19:
-            args.rho *= 0.7
-            for g in optimizer.param_groups:
-                g['lr'] *= 0.1
-            criterion = [
-                TripletLoss(args.margin, args.num_instances, False).cuda(),
-                TripletLoss(args.margin, args.num_instances, False).cuda(),
-            ]
-            mean_ap, rank1, rank5, rank10 = evaluator.evaluate(
-                test_loader, tgt_dataset.query, tgt_dataset.gallery)
 
+    # Evaluate
     mean_ap, rank1, rank5, rank10 = evaluator.evaluate(
         test_loader, tgt_dataset.query, tgt_dataset.gallery)
     return (mean_ap, rank1, rank5, rank10)
@@ -278,7 +267,7 @@ if __name__ == '__main__':
                         help="evaluation only")
     parser.add_argument('--seed', type=int, default=1)
     parser.add_argument('--print_freq', type=int, default=1)
-    parser.add_argument('--iteration', type=int, default=20)
+    parser.add_argument('--iteration', type=int, default=30)
     parser.add_argument('--epochs', type=int, default=70)
     # metric learning
     parser.add_argument('--dist_metric', type=str, default='euclidean',
