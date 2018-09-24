@@ -265,7 +265,6 @@ if __name__ == '__main__':
     # optimizer
     parser.add_argument('--lr', type=float, default=6e-5,
                         help="learning rate of all parameters")
-    parser.add_argument('--weight-decay', type=float, default=5e-4)
     # training configs
     parser.add_argument('--resume', type=str, metavar='PATH',
                         default = '')
