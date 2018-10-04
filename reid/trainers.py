@@ -18,9 +18,9 @@ class BaseTrainer(object):
 
     def train(self, epoch, data_loader, optimizer):
         self.model.train()
-        for name, param in self.model.named_parameters():
-            if 'classifier' in name:
-                param.requires_grad = False
+        # for name, param in self.model.named_parameters():
+        #     if 'classifier' in name:
+        #         param.requires_grad = False
 
         batch_time = AverageMeter()
         data_time = AverageMeter()
@@ -81,10 +81,7 @@ class Trainer(BaseTrainer):
         #new added by wc
         # x1 triplet loss
         loss_tri, prec_tri = self.criterions[0](outputs[0], targets, epoch)
-        # x2 global feature cross entropy loss
-        #loss_global = self.criterions[1](outputs[1], targets)
+        # x2 triplet loss
         loss_global, prec_global = self.criterions[1](outputs[1], targets, epoch)
-        #prec_global, = accuracy(outputs[1].data, targets.data)
-        #prec_global = prec_global[0]
 
         return loss_tri+loss_global, prec_global

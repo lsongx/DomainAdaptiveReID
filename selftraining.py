@@ -137,7 +137,7 @@ def main(args):
 
     # Evaluator
     evaluator = Evaluator(model, print_freq=args.print_freq)
-    print("Test with the original model trained on source domain:")
+    print("Test with the original model trained on target domain (direct transfer):")
     evaluator.evaluate(test_loader, tgt_dataset.query, tgt_dataset.gallery)
     if args.evaluate:
         return
@@ -223,9 +223,9 @@ def main(args):
             trainer.train(epoch, train_loader, optimizer)
 
     # Evaluate
-    mean_ap, rank1, rank5, rank10 = evaluator.evaluate(
+    rank_score = evaluator.evaluate(
         test_loader, tgt_dataset.query, tgt_dataset.gallery)
-    return (mean_ap, rank1, rank5, rank10)
+    return (rank_score.map, rank_score.market1501[0])
 
 
 if __name__ == '__main__':
@@ -284,8 +284,8 @@ if __name__ == '__main__':
                         default='')
 
     args = parser.parse_args()
-    mean_ap, rank1, rank5, rank10 = main(args)
-    results_file = np.asarray([mean_ap, rank1, rank5, rank10])
+    mean_ap, rank1 = main(args)
+    results_file = np.asarray([mean_ap, rank1])
     file_name = time.strftime("%H%M%S", time.localtime())
     file_name = osp.join(args.logs_dir, file_name)
     np.save(file_name, results_file)
