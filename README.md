@@ -51,7 +51,7 @@ python selftraining.py \
 ### Step 1: After training on source dataset
 
 | Source Dataset | Rank-1 | mAP |
-| --- | :---: | :---: | :---: |
+| :--- | :---: | :---: | :---: |
 | DukeMTMC | 80.8 | 65.4 |
 | Market1501 | 91.6 | 78.2 |
 | CUHK03 | 48.79 | 46.95 |
@@ -73,15 +73,15 @@ python selftraining.py \
         <td>Rank-1</td>
         <td>mAP</td>
     </tr>
-    <tr><td>CUHK --> Market</td><td>77.14</td><td>56.60</td><td>43.26</td><td>19.95</td><td></td></tr>
-    <tr><td>CUHK --> DUKE</td><td>62.48</td><td>42.26</td><td>19.52</td><td>8.74</td><td></td></tr>
+    <tr><td>CUHK --> Market</td><td>77.14</td><td>56.60</td><td>43.26</td><td>19.95</td><td>default</td></tr>
+    <tr><td>CUHK --> DUKE</td><td>62.48</td><td>42.26</td><td>19.52</td><td>8.74</td><td>default</td></tr>
     <tr><td>CUHK --> MSMT</td><td>29.57</td><td>11.28</td><td>8.64</td><td>2.49</td><td>4GPU</td></tr>
     <tr><td>Market --> DUKE</td><td>68.4</td><td>49.0</td><td>27.3</td><td>11.9</td><td>default</td></tr>
-    <tr><td>Market --> CUHK</td><td>20.32</td><td>20.85</td><td>4.07</td><td>4.53</td><td></td></tr>
-    <tr><td>Market --> MSMT</td><td>30.54</td><td>12.04</td><td>8.37</td><td>2.54</td><td>4GPU, num_instance=8</td></tr>
+    <tr><td>Market --> CUHK</td><td>20.32</td><td>20.85</td><td>4.07</td><td>4.53</td><td>default</td></tr>
+    <tr><td>Market --> MSMT</td><td>30.54</td><td>12.04</td><td>8.37</td><td>2.54</td><td>4GPU, num_instances=8</td></tr>
     <tr><td>DUKE --> Market</td><td>75.8</td><td>53.7</td><td>46.8</td><td>19.1</td><td>default</td></tr>
-    <tr><td>DUKE --> CUHK</td><td>9.89</td><td>10.32</td><td>4.43</td><td>4.56</td><td></td></tr>
-    <tr><td>DUKE --> MSMT</td><td>39.22</td><td>15.99</td><td>12.38</td><td>3.82</td><td>4GPU, num_instance=8</td></tr>
+    <tr><td>DUKE --> CUHK</td><td>9.89</td><td>10.32</td><td>4.43</td><td>4.56</td><td>default</td></tr>
+    <tr><td>DUKE --> MSMT</td><td>39.22</td><td>15.99</td><td>12.38</td><td>3.82</td><td>4GPU, num_instances=8</td></tr>
     <tr><td>MSMT --> Market</td><td>80.94</td><td>59.97</td><td>49.47</td><td>23.71</td><td>4GPU</td></tr>
     <tr><td>MSMT --> DUKE</td><td>74.96</td><td>57.05</td><td>46.54</td><td>27.01</td><td>4GPU</td></tr>
     <tr><td>MSMT --> CUHK</td><td>16.21</td><td>16.56</td><td>10.71</td><td>11.59</td><td>4GPU</td></tr>
