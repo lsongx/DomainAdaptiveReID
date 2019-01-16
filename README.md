@@ -51,7 +51,7 @@ python selftraining.py \
 ### Step 1: After training on source dataset
 
 | Source Dataset | Rank-1 | mAP |
-| :--- | :---: | :---: | :---: |
+| :--- | :---: | :---: |
 | DukeMTMC | 80.8 | 65.4 |
 | Market1501 | 91.6 | 78.2 |
 | CUHK03 | 48.79 | 46.95 |
