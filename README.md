@@ -6,22 +6,34 @@ The selftraining scheme proposed in the paper is simple yet effective.
 
 ![Illustration of the selftraining scheme.](./data/algorithm_illustration.png)
 
-## Setup
+<!-- ## Setup
 
 1. Datasets (source dataset and target dataset).
 2. Pre-trained (on source dataset) model.
 
 ## Requirements
 
-- PyTorch
+- PyTorch -->
 
 ## Running the experiments
 
+### Step 1: Train on source dataset
+
+Run `source_train.py` via
+
+```shell
+python source_train.py \
+    --dataset <name_of_source_dataset>\
+    --resume <dir_of_source_trained_model>\
+    --data_dir <dir_of_source_data>\
+    --logs_dir <dir_to_save_source_trained_model>
+```
+
 To replicate the results in the paper, you can download pre-trained models on Market1501 from [GoogleDrive](https://drive.google.com/open?id=1xNqduSroUMDbM_E5VeeR1WuykMh8Oxlb) and on DukeMTMC from [GoogleDrive](https://drive.google.com/file/d/1CFuf_vF9OphbuCyMefa3W8GA8tgcvSkI/view?usp=sharing). Our models are trained with __PyTorch 0.3__.
 
-<!-- > Code is temporarily removed in the latest commit due to a bug of memory leak. Please check the commit history. If you have any questions, please contact liangchen.song AT horizon.ai. -->
+### Step 2: Run self-training
 
-```
+```shell
 python selftraining.py \
     --src_dataset <name_of_source_dataset>\
     --tgt_dataset <name_of_target_dataset>\
@@ -30,33 +42,50 @@ python selftraining.py \
     --logs_dir <dir_to_save_model_after_adaptation>
 ```
 
+### Other code
+
 `dw_example.ipynb` is the file for replicating Figure 6 in the paper.
 
-### Results
+## Results
 
-#### DukeMTMC ---> Market1501
+### Step 1: After training on source dataset
 
-| | Rank-1 | Rank-5 | Rank-10| mAP|
-| --- | :---: | :---: | :---: | :---: |
-|On source (DukeMTMC)| 80.8 | 91.2 | 94.2 | 65.4|
-|On target (Market1501)| 46.8|64.6|71.5|19.1|
-|After adaptation| 75.8|89.5|93.2|53.7|
+| Source Dataset | Rank-1 | mAP |
+| --- | :---: | :---: | :---: |
+| DukeMTMC | 80.8 | 65.4 |
+| Market1501 | 91.6 | 78.2 |
+| CUHK03 | 48.79 | 46.95 |
+| MSMT17 | 69.82| 42.48 |
 
-#### Market1501 ---> DukeMTMC
+### Step 2: After adaptation
 
-| | Rank-1 | Rank-5 | Rank-10| mAP|
-| --- | :---: | :---: | :---: | :---: |
-|On source (Market1501)| 91.6 | 97.1 | 98.5 | 78.2|
-|On target (DukeMTMC)| 27.3|41.2|47.1|11.9|
-|After adaptation| 68.4|80.1|83.5|49.0|
-
-<!-- #### Market1501 --- > CUHK03 -->
-
-<!-- | | Rank-1 | Rank-5 | Rank-10| mAP| -->
-<!-- | --- | :---: | :---: | :---: | :---: | -->
-<!-- |On source (Market1501)| 91.6 | 97.1 | 98.5 | 78.2| -->
-<!-- |On target (CUHK03)| 11.5|23.5|34.5|9.0| -->
-<!-- |After adaptation| 38.0|59.5|69.0|28.9| -->
+<!-- markdownlint-disable MD033 -->
+<table>
+    <tr>
+        <th rowspan="2">SRC --&gt; TGT</th>
+        <th colspan="2">Before Adaptation</th>
+        <th colspan="2">After Adaptation</th>
+        <th rowspan="2">Settings</th>
+    </tr>
+    <tr>
+        <td>Rank-1</td>
+        <td>mAP</td>
+        <td>Rank-1</td>
+        <td>mAP</td>
+    </tr>
+    <tr><td>CUHK --> Market</td><td>77.14</td><td>56.60</td><td>43.26</td><td>19.95</td><td></td></tr>
+    <tr><td>CUHK --> DUKE</td><td>62.48</td><td>42.26</td><td>19.52</td><td>8.74</td><td></td></tr>
+    <tr><td>CUHK --> MSMT</td><td>29.57</td><td>11.28</td><td>8.64</td><td>2.49</td><td>4GPU</td></tr>
+    <tr><td>Market --> DUKE</td><td>68.4</td><td>49.0</td><td>27.3</td><td>11.9</td><td>default</td></tr>
+    <tr><td>Market --> CUHK</td><td>20.32</td><td>20.85</td><td>4.07</td><td>4.53</td><td></td></tr>
+    <tr><td>Market --> MSMT</td><td>30.54</td><td>12.04</td><td>8.37</td><td>2.54</td><td>4GPU, num_instance=8</td></tr>
+    <tr><td>DUKE --> Market</td><td>75.8</td><td>53.7</td><td>46.8</td><td>19.1</td><td>default</td></tr>
+    <tr><td>DUKE --> CUHK</td><td>9.89</td><td>10.32</td><td>4.43</td><td>4.56</td><td></td></tr>
+    <tr><td>DUKE --> MSMT</td><td>39.22</td><td>15.99</td><td>12.38</td><td>3.82</td><td>4GPU, num_instance=8</td></tr>
+    <tr><td>MSMT --> Market</td><td>80.94</td><td>59.97</td><td>49.47</td><td>23.71</td><td>4GPU</td></tr>
+    <tr><td>MSMT --> DUKE</td><td>74.96</td><td>57.05</td><td>46.54</td><td>27.01</td><td>4GPU</td></tr>
+    <tr><td>MSMT --> CUHK</td><td>16.21</td><td>16.56</td><td>10.71</td><td>11.59</td><td>4GPU</td></tr>
+</table>
 
 ## Acknowledgement
 
