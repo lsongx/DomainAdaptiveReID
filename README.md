@@ -87,6 +87,26 @@ python selftraining.py \
     <tr><td>MSMT --&gt; CUHK</td><td>10.71</td><td>11.59</td><td>16.21</td><td>16.56</td><td>4GPU</td></tr>
 </table>
 
+## FAQ
+
+If you found difficulty in reproducing our reported results, please check the number of GPUs in your experiments. This may be caused by the un-sync BN layer implementation of PyTorch. Below we provide some training logs with the setting Duke --> Market, for helping you check your experiment settings.
+
+### With 1 GPU
+
+| Job ID | 24312 | 24313 | 24314 | 24315| 24316 |24317|
+| --- | :---: | :---: | :---: | :---: | :---: | :---: |
+|Rank 1| 72.7|72.8|73.1|72.9|73.8|73.0|
+
+[OneDrive Download Link](https://1drv.ms/u/s!AqzBcxT1FhwGjmvTf1AADW7JRVf2)
+
+### With 2 GPU
+
+| Job ID | 24306 | 24307 | 24308 | 24309| 24310 |24311|
+| --- | :---: | :---: | :---: | :---: | :---: | :---: |
+|Rank 1| 75.1|75.7|77.5|76.1|77.5|77.3|
+
+[OneDrive Download Link](https://1drv.ms/u/s!AqzBcxT1FhwGjmrOVqAc80h3STAN)
+
 ## Acknowledgement
 
 Our code is based on [open-reid](https://github.com/Cysu/open-reid).
